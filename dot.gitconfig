@@ -1,0 +1,49 @@
+[color]
+  ui = auto
+[user]
+  name = xxx
+  email = xxx@example.com
+[credential]
+  helper = osxkeychain
+[alias]
+  a  = add
+  al = add -A .
+  ap = add -p
+  au = add -u
+  b  = branch
+  ba = branch -a
+  bm = branch -a --merged
+  c  = commit -v
+  ci = commit
+  ca = commit -v --amend
+  cb = checkout -b
+  co = checkout
+  d  = diff
+  ds = diff --staged
+  dst = difftool --staged -d
+  dt = difftool -d
+  fp = fetch -p
+  gn = grep -n
+  l  = log --decorate
+  lo = log --oneline --decorate --graph
+  lp = log -p --decorate
+  ls = log --stat --decorate
+  pd = push --delete
+  po = push origin
+  pr = pull --rebase
+  ps = push
+  rh = reset HEAD^
+  ri = !sh -c 'git rebase -i HEAD~$0'
+  ru = remote update --prune
+  st = status -sb
+  su = submodule update
+  wd = diff --word-diff
+  delete-merged-branches = !git branch --merged | grep -v \\* | xargs -I % git branch -d %
+
+[merge]
+  # from 1.7.6
+  ff = false
+
+[core]
+  excludesfile = ~/.gitignore
+
