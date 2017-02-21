@@ -29,7 +29,7 @@
   lp = log -p --decorate
   ls = log --stat --decorate
   pd = push --delete
-  po = push origin
+  po = !git push origin `git rev-parse --abbrev-ref HEAD`
   pr = pull --rebase
   ps = push
   rh = reset HEAD^
