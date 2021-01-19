@@ -1,3 +1,4 @@
+export PATH="$HOME/.rbenv/bin:$PATH"
 export LANG=ja_JP.UTF-8
 export EDITOR=emacs
 HISTFILE=$HOME/.zsh-history
@@ -171,4 +172,3 @@ function current_branch() {
   ref=$(git rev-parse --short HEAD 2> /dev/null) || return
   echo ${ref#refs/heads/}
 }
-
