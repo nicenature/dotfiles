@@ -1,103 +1,144 @@
-alias vi="vim"
-alias view="vim -R"
-alias diff=colordiff
-alias ls='ls -GF'
-alias la='ls -a'
-alias ll='ls -al'
-alias cdp='cd -P'
-alias tm="tmux -2 attach"
-alias tailf="tail -f"
-alias less="less -NS"
-alias gls="gls --color"
-
-alias l='ls -CF'
-alias dir='ls -al'
+# --- General Shell Aliases ---
+alias vi='vim'
+alias view='vim -R' # Open vim in read-only mode
+alias diff='colordiff'
+alias ls='ls -GF'   # ls with colors and flags indicating file types
+alias la='ls -a'    # List all files including hidden ones
+alias ll='ls -al'   # List all files in long format, including hidden ones
+alias l='ls -CF'    # List files in columns, sorted vertically
+alias dir='ls -al'  # Alternative to ll
+alias cdp='cd -P'   # Change directory resolving symbolic links
+alias tm='tmux -2 attach' # Attach to tmux session with 256 color support
+alias tailf='tail -f' # Follow the content of a file
+alias less='less -NS' # Less with line numbers and long lines chopped
 alias h='history'
-alias rm='rm -i'
-alias mv='mv -i'
-alias cp='cp -i'
+alias rm='rm -i'    # Prompt before removing
+alias mv='mv -i'    # Prompt before moving/renaming
+alias cp='cp -i'    # Prompt before copying
+alias wget='wget --output-file=$HOME/.wget.log --append-output=$HOME/.wget.log' # Log wget activity
 
-# node.js
+# --- Development Tools ---
+# Git
+alias g='git'
+alias gg='git grep' # Grep in git repository
+alias -g H='| head' # Pipe git output to head (requires zsh)
+alias -g T='| tail' # Pipe git output to tail (requires zsh)
+alias -g G='| grep' # Pipe git output to grep (requires zsh)
+
+# Node.js
 alias ni='npm install'
 
-# ディレクトリの履歴
-alias gd='dirs -v; echo -n "select number: "; read newdir; cd -"$newdir"'
-alias emacs='emacs -nw'
+# Ruby / Bundler / RSpec
+alias be='bundle exec'  # Execute a command in the context of the bundle
+alias bu='bundle update' # Update gems in the bundle
+alias bi='bundle install'# Install gems specified in the Gemfile
+alias br='bundle exec rspec' # Run RSpec tests
 
-# for mac
-alias fcd='source ~/bin/fcd.sh'
-alias here='open .'
+# --- Mac OS Specific ---
+alias fcd='source ~/bin/fcd.sh' # Fast change directory (custom script)
+alias here='open .'             # Open current directory in Finder
+alias ce='open -a /Applications/Emacs.app/Contents/MacOS/Emacs' # Open Emacs GUI application
+alias gls="gls --color" # GNU ls with color (requires coreutils)
 
-# for bundler
-alias be='bundle exec'
-alias bu='bundle update'
-alias bi='bundle install'
-
-# for rspec
-alias br='bundle exec rspec '
-
-alias clup="find -E . -regex '.*\/(#.*#|.*~)' -print0 |xargs -0 rm"
-
-alias g='git'
-alias -g H='| head'
-alias -g T='| tail'
-alias -g G='| grep'
-alias gg='git grep'
-
-### functions
-function chpwd() { ls }
-
-function psg() {
-  psa | head -n 1
-  psa | grep $* | grep -v "ps -auxww" | grep -v grep
-}
-
-# up command
-# http://gist.github.com/607290
-# http://d.hatena.ne.jp/hitode909/20101002/1285994430
-function up() {
-    to=$(perl -le '$p=$ENV{PWD}."/";$d="/".$ARGV[0]."/";$r=rindex($p,$d);$r>=0 && print substr($p, 0, $r+length($d))' $1)
-    if [ "$to" = "" ]; then
-        echo "no such file or directory: $1" 1>&2
-        return 1
-    fi
-    cd $to
-}
-
-# cdb
-function cdb() {
-  cd `ruby -e "require 'rubygems';gem 'bundler';require 'bundler';Bundler.load.specs.each{|s| puts s.full_gem_path if s.name == '${1}'}"`
-}
-
-# for mac applications
-alias ce='open -a /Applications/Emacs.app/Contents/MacOS/Emacs'
-
-alias wget="wget --output-file=$HOME/.wget.log --append-output=$HOME/.wget.log"
-
-# alias -s(suffix alias) http://goo.gl/JSh6A
+# On macOS, set chrome alias if Google Chrome is available
 if [ `uname` = "Darwin" ]; then
   alias google-chrome='open -a Google\ Chrome'
 fi
-alias chrome='google-chrome'
+alias chrome='google-chrome' # Assumes google-chrome is aliased or in PATH
 
-alias -s html=chrome
+# --- Functions ---
 
-function extract() {
-  case $1 in
-    *.tar.gz|*.tgz) tar xzvf $1;;
-    *.tar.xz) tar Jxvf $1;;
-    *.zip) unzip $1;;
-    *.lzh) lha e $1;;
-    *.tar.bz2|*.tbz) tar xjvf $1;;
-    *.tar.Z) tar zxvf $1;;
-    *.gz) gzip -dc $1;;
-    *.bz2) bzip2 -dc $1;;
-    *.Z) uncompress $1;;
-    *.tar) tar xvf $1;;
-    *.arj) unarj $1;;
-  esac
+# Automatically list directory contents on cd
+function chpwd() {
+  ls
 }
-alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
 
-function runcpp () { g++ -O2 $1; ./a.out }
+# Grep process list
+# Usage: psg <pattern>
+function psg() {
+  ps -auxww | head -n 1 # Print header
+  ps -auxww | grep "$*" | grep -v "ps -auxww" | grep -v grep # Search for pattern, excluding self
+}
+
+# Navigate upwards in directory tree to a directory matching the argument
+# Example: if PWD is /a/b/c/d/e, `up c` will cd to /a/b/c/
+# Based on: http://gist.github.com/607290 and http://d.hatena.ne.jp/hitode909/20101002/1285994430
+function up() {
+    local to=$(perl -le '
+        $p = $ENV{PWD} . "/";      # Current path with trailing slash
+        $d = "/" . $ARGV[0] . "/"; # Target directory pattern
+        $r = rindex($p, $d);      # Find last occurrence of target in path
+        if ($r >= 0) {
+            print substr($p, 0, $r + length($d)); # Print path up to and including target
+        }
+    ' "$1")
+
+    if [ -z "$to" ]; then
+        echo "up: no directory matching '$1' found in path." 1>&2
+        return 1
+    fi
+    cd "$to"
+}
+
+# Change directory to a Bundler gem's source directory
+# Usage: cdb <gem_name>
+function cdb() {
+  local gem_path=$(ruby -e "
+    require 'rubygems';
+    gem 'bundler';
+    require 'bundler';
+    Bundler.load.specs.each { |s| puts s.full_gem_path if s.name == '${1}' }
+  ")
+  if [ -n "$gem_path" ]; then
+    cd "$gem_path"
+  else
+    echo "cdb: gem '$1' not found in bundle." 1>&2
+    return 1
+  fi
+}
+
+# Extract various archive types
+# Usage: extract <file>
+function extract() {
+  if [ -f "$1" ] ; then
+    case $1 in
+      *.tar.gz|*.tgz)   tar xzvf "$1" ;;
+      *.tar.xz)         tar Jxvf "$1" ;;
+      *.zip)            unzip "$1" ;;
+      *.lzh)            lha e "$1" ;;
+      *.tar.bz2|*.tbz)  tar xjvf "$1" ;;
+      *.tar.Z)          tar zxvf "$1" ;;
+      *.gz)             gzip -dc "$1" ;;
+      *.bz2)            bzip2 -dc "$1" ;;
+      *.Z)              uncompress "$1" ;;
+      *.tar)            tar xvf "$1" ;;
+      *.arj)            unarj "$1" ;;
+      *)                echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# Clean up Emacs backup files and other temporary files
+# Finds files ending with # or ~ (Emacs backups) or .~ (other temp files)
+alias clup="find -E . -regex '.*\/(#.*#|.*~)' -print0 | xargs -0 rm"
+
+# --- Suffix Aliases (Zsh specific) ---
+# These aliases allow you to open files with specific programs based on their extension
+# Example: `foo.html` will open with chrome (if chrome is aliased)
+# Example: `bar.c` will run the C compiler and execute the output
+
+# Directory history navigation
+# Lists directories in history, prompts for selection, then cds to it
+alias gd='dirs -v; echo -n "select number: "; read newdir; cd -"$(echo $newdir)"' # Added $() for robust newdir handling
+
+alias -s html=chrome # Open .html files with chrome (requires chrome alias)
+alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract # Extract archives by typing their name
+
+# Compile and run C/C++ files
+# Usage: filename.c or filename.cpp
+function runcpp() {
+  g++ -O2 "$1" && ./a.out # Compile with optimizations and run
+}
 alias -s {c,cpp}=runcpp
