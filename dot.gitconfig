@@ -5,45 +5,66 @@
   email = xxx@example.com
 [credential]
   helper = osxkeychain
-[alias]
-  a  = add
-  al = add -A .
-  ap = add -p
-  au = add -u
-  b  = branch
-  ba = branch -a
-  bm = branch -a --merged
-  c  = commit -v
-  ci = commit
-  ca = commit -v --amend
-  cb = checkout -b
-  co = checkout
-  d  = diff
-  ds = diff --staged
-  dst = difftool --staged -d
-  dt = difftool -d
-  fp = fetch -p
-  gn = grep -n
-  l  = log --decorate
-  lo = log --oneline --decorate --graph
-  lp = log -p --decorate
-  ls = log --stat --decorate
-  pd = push --delete
-  po = !git push origin `git rev-parse --abbrev-ref HEAD`
-  pr = pull --rebase
-  ps = push
-  rh = reset HEAD^
-  ri = !sh -c 'git rebase -i HEAD~$0'
-  ru = remote update --prune
-  st = status -sb
-  su = submodule update
-  wd = diff --word-diff
-  delete-merged-branches = !git branch --merged | grep -v \\* | xargs -I % git branch -d %
-
 [merge]
-  # from 1.7.6
+  # Always create a merge commit when merging, even if it's a fast-forward
+  # (equivalent to --no-ff)
   ff = false
-
 [core]
   excludesfile = ~/.gitignore
 
+[alias]
+  # --- Adding ---
+  a  = add
+  al = add -A .               # Stage all changes in the current directory
+  ap = add -p                 # Interactively stage changes
+  au = add -u                 # Stage modified and deleted files, but not new files
+
+  # --- Branching ---
+  b  = branch
+  ba = branch -a              # List all local and remote branches
+  bm = branch -a --merged     # List all branches merged into the current branch
+  # Delete branches that have been merged into the current branch (excluding current branch)
+  delete-merged-branches = !git branch --merged | grep -v '\\*' | xargs -I % git branch -d %
+
+  # --- Committing ---
+  c  = commit -v               # Commit with verbose output
+  ci = commit                 # Standard commit
+  ca = commit -v --amend      # Amend the previous commit with verbose output
+
+  # --- Checking out ---
+  cb = checkout -b            # Create a new branch and switch to it
+  co = checkout               # Switch branches or restore working tree files
+
+  # --- Diffing ---
+  d  = diff
+  ds = diff --staged          # Show staged changes
+  dst = difftool --staged -d  # Show staged changes with difftool
+  dt = difftool -d            # Show changes with difftool
+  wd = diff --word-diff       # Show word-level differences
+
+  # --- Logging ---
+  l  = log --decorate
+  lo = log --oneline --decorate --graph # Concise log with graph and decorations
+  lp = log -p --decorate      # Log with patch output and decorations
+  ls = log --stat --decorate    # Log with stats and decorations
+
+  # --- Pushing, Fetching, Remotes ---
+  fp = fetch -p               # Fetch from all remotes and prune deleted branches
+  pd = push --delete          # Delete a remote branch
+  # Push current local branch to origin, setting upstream if necessary
+  po = !git push origin `git rev-parse --abbrev-ref HEAD`
+  pr = pull --rebase          # Pull and rebase changes
+  ps = push                   # Push changes
+  ru = remote update --prune  # Update all remotes and prune deleted branches
+
+  # --- Rebasing & Resetting ---
+  rh = reset HEAD^            # Reset to the commit before HEAD (soft reset)
+  # Interactive rebase starting from N commits before HEAD
+  # Usage: git ri <number_of_commits>
+  # Example: git ri 3  (interactive rebase for the last 3 commits)
+  ri = !sh -c 'git rebase -i HEAD~$0'
+
+  # --- Submodules & Grepping ---
+  gn = grep -n                # Grep with line numbers
+  st = status -sb             # Status in short format with branch info
+  su = submodule update       # Update submodules
